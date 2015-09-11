@@ -13,18 +13,56 @@ import os
 import random
 import copy
 
-class Window(wx.Window):
+class Frame(wx.Frame):
 
-    def __init__(self,parent):
-        super(Window,self).__init__(parent)
-        self.colors = {0:(204,192,179),2:(238, 228, 218),4:(237, 224, 200),8:(242, 177, 121),16:(245, 149, 99),32:(246, 124, 95),64:(246, 94, 59),128:(237, 207, 114),256:(237, 207, 114),512:(237, 207, 114),1024:(237, 207, 114),2048:(237, 207, 114),4096:(237, 207, 114),8192:(237, 207, 114),16384:(237, 207, 114),32768:(237, 207, 114),65536:(237, 207, 114),131072:(237, 207, 114),262144:(237, 207, 114),524288:(237, 207, 114),1048576:(237, 207, 114),2097152:(237, 207, 114),4194304:(237, 207, 114),8388608:(237, 207, 114),16777216:(237, 207, 114),33554432:(237, 207, 114),67108864:(237, 207, 114),134217728:(237, 207, 114),268435456:(237, 207, 114),536870912:(237, 207, 114),1073741824:(237, 207, 114),2147483648:(237, 207, 114),4294967296:(237, 207, 114),8589934592:(237, 207, 114),17179869184:(237, 207, 114),34359738368:(237, 207, 114),68719476736:(237, 207, 114),137438953472:(237, 207, 114),274877906944:(237, 207, 114),549755813888:(237, 207, 114),1099511627776:(237, 207, 114),2199023255552:(237, 207, 114),4398046511104:(237, 207, 114),8796093022208:(237, 207, 114),17592186044416:(237, 207, 114),35184372088832:(237, 207, 114),70368744177664:(237, 207, 114),140737488355328:(237, 207, 114),281474976710656:(237, 207, 114),562949953421312:(237, 207, 114),1125899906842624:(237, 207, 114),2251799813685248:(237, 207, 114),4503599627370496:(237, 207, 114),9007199254740992:(237, 207, 114),18014398509481984:(237, 207, 114),36028797018963968:(237, 207, 114),72057594037927936:(237, 207, 114)}
+    def __init__(self,title):
+        super(Frame,self).__init__(None,-1,title,
+                style=wx.DEFAULT_FRAME_STYLE^wx.MAXIMIZE_BOX^wx.RESIZE_BORDER)
+
+        self.colors = {0:(204,192,179),2:(238, 228, 218),4:(237, 224, 200),
+                8:(242, 177, 121),16:(245, 149, 99),32:(246, 124, 95),
+                64:(246, 94, 59),128:(237, 207, 114),256:(237, 207, 114),
+                512:(237, 207, 114),1024:(237, 207, 114),2048:(237, 207, 114),
+                4096:(237, 207, 114),8192:(237, 207, 114),16384:(237, 207, 114),
+                32768:(237, 207, 114),65536:(237, 207, 114),131072:(237, 207, 114),
+                262144:(237, 207, 114),524288:(237, 207, 114),1048576:(237, 207, 114),
+                2097152:(237, 207, 114),4194304:(237, 207, 114),
+                8388608:(237, 207, 114),16777216:(237, 207, 114),
+                33554432:(237, 207, 114),67108864:(237, 207, 114),
+                134217728:(237, 207, 114),268435456:(237, 207, 114),
+                536870912:(237, 207, 114),1073741824:(237, 207, 114),
+                2147483648:(237, 207, 114),4294967296:(237, 207, 114),
+                8589934592:(237, 207, 114),17179869184:(237, 207, 114),
+                34359738368:(237, 207, 114),68719476736:(237, 207, 114),
+                137438953472:(237, 207, 114),274877906944:(237, 207, 114),
+                549755813888:(237, 207, 114),1099511627776:(237, 207, 114),
+                2199023255552:(237, 207, 114),4398046511104:(237, 207, 114),
+                8796093022208:(237, 207, 114),17592186044416:(237, 207, 114),
+                35184372088832:(237, 207, 114),70368744177664:(237, 207, 114),
+                140737488355328:(237, 207, 114),281474976710656:(237, 207, 114),
+                562949953421312:(237, 207, 114),1125899906842624:(237, 207, 114),
+                2251799813685248:(237, 207, 114),4503599627370496:(237, 207, 114),
+                9007199254740992:(237, 207, 114),18014398509481984:(237, 207, 114),
+                36028797018963968:(237, 207, 114),72057594037927936:(237, 207, 114)}
+                
+        self.setIcon()
         self.initGame()
         self.initBuffer()
-        self.Bind(wx.EVT_SIZE,self.onSize) # use wx.BufferedPaintDC
-        self.Bind(wx.EVT_PAINT,self.onPaint)
+        self.Bind(wx.EVT_SIZE,self.onSize) 
         self.Bind(wx.EVT_KEY_DOWN,self.onKeyDown)
-        self.data_go_back=[]
+        self.Bind(wx.EVT_CLOSE,self.onClose)
+        self.SetClientSize((505,720))
+        self.Center()
+        self.Show()
+        
+    def onClose(self,event):
+        self.saveScore()
+        self.Destroy()
 
+    def setIcon(self):
+        icon = wx.Icon("icon.ico",wx.BITMAP_TYPE_ICO)
+        self.SetIcon(icon)
+        
     def loadScore(self):
         if os.path.exists("bestscore.ini"):
             ff = open("bestscore.ini")
@@ -59,9 +97,6 @@ class Window(wx.Window):
     def onSize(self,event):
         self.initBuffer()
         self.drawAll()
-
-    def onPaint(self,event):
-        dc = wx.BufferedPaintDC(self,self.buffer)
 
     def putTile(self):
         available = []
@@ -134,7 +169,8 @@ class Window(wx.Window):
         copyData = copy.deepcopy(self.data)
         
         flag = False
-        if not self.slideUpDown(True)[0] and not self.slideUpDown(False)[0] and not self.slideLeftRight(True)[0] and not self.slideLeftRight(False)[0]:
+        if not self.slideUpDown(True)[0] and not self.slideUpDown(False)[0] and \
+                not self.slideLeftRight(True)[0] and not self.slideLeftRight(False)[0]:
             flag = True
         if not flag: self.data = copyData
         return flag
@@ -144,7 +180,8 @@ class Window(wx.Window):
             self.putTile()
             self.drawChange(score)
             if self.isGameOver():
-                if wx.MessageBox(u"游戏结束，是否重新开始？",u"哈哈",wx.YES_NO|wx.ICON_INFORMATION)==wx.YES:
+                if wx.MessageBox(u"游戏结束，是否重新开始？",u"哈哈",
+                        wx.YES_NO|wx.ICON_INFORMATION)==wx.YES:
                     bstScore = self.bstScore
                     self.initGame()
                     self.bstScore = bstScore
@@ -152,9 +189,7 @@ class Window(wx.Window):
 
     def onKeyDown(self,event):
         keyCode = event.GetKeyCode()
-        
-        self.data_go_back.append([self.data,self.curScore])
-        
+                
         if keyCode==wx.WXK_UP:
             self.doMove(*self.slideUpDown(True))
         elif keyCode==wx.WXK_DOWN:
@@ -162,16 +197,7 @@ class Window(wx.Window):
         elif keyCode==wx.WXK_LEFT:
             self.doMove(*self.slideLeftRight(True))
         elif keyCode==wx.WXK_RIGHT:
-            self.doMove(*self.slideLeftRight(False))
-        
-        if self.data==self.data_go_back[-1][0]:
-            del self.data_go_back[-1]
-        else:    
-            if len(self.data_go_back)>10:
-                del self.data_go_back[0]
-        
-        print self.data_go_back
-        
+            self.doMove(*self.slideLeftRight(False))        
                 
     def drawBg(self,dc):
         dc.SetBackground(wx.Brush((250,248,239)))
@@ -189,15 +215,10 @@ class Window(wx.Window):
         dc.SetFont(self.smFont)
         dc.SetTextForeground((119,110,101))
         dc.DrawText(u"合并相同数字，得到2048吧!",15,114)
-        dc.DrawText(u"怎么玩: \n用-> <- 上下左右箭头按键来移动方块. \n当两个相同数字的方块碰到一起时，会合成一个!",15,639)
+        dc.DrawText(u"怎么玩: \n用-> <- 上下左右箭头按键来移动方块. \
+                \n当两个相同数字的方块碰到一起时，会合成一个!",15,639)
 
-    def drawScore(self,dc):
-    
-        #bmp = wx.Image("goback.bmp", wx.BITMAP_TYPE_BMP).ConvertToBitmap() 
-        button_labels = 'goBack'
-        buttonIterm = wx.Button(self,1,button_labels,pos=(250, 40))
-        self.Bind(wx.EVT_BUTTON,self.goBack,buttonIterm)
-            
+    def drawScore(self,dc):            
         dc.SetFont(self.smFont)
         scoreLabelSize = dc.GetTextExtent(u"SCORE")
         bestLabelSize = dc.GetTextExtent(u"BEST")
@@ -219,13 +240,6 @@ class Window(wx.Window):
         dc.SetTextForeground((255,255,255))
         dc.DrawText(str(self.bstScore),505-15-bstScoreBoardW+(bstScoreBoardW-bstScoreSize[0])/2,68)
         dc.DrawText(str(self.curScore),505-15-bstScoreBoardW-5-curScoreBoardW+(curScoreBoardW-curScoreSize[0])/2,68)
-
-    def goBack(self,event):
-        if len(self.data_go_back)>0:
-            self.data = self.data_go_back[-1][0]
-            self.curScore = self.data_go_back[-1][1]
-            del self.data_go_back[-1]
-            self.drawAll()
     
     def drawTiles(self,dc):
         dc.SetFont(self.scFont)
@@ -265,33 +279,7 @@ class Window(wx.Window):
         self.drawTiles(dc)
 
         
-class Frame(wx.Frame):
-
-    def __init__(self,title):
-        super(Frame,self).__init__(None,-1,title,style=wx.DEFAULT_FRAME_STYLE^wx.MAXIMIZE_BOX^wx.RESIZE_BORDER)
-        self.setIcon()
-        self.window = Window(self)
-        self.Bind(wx.EVT_CLOSE,self.onClose)
-
-    def onClose(self,event):
-        self.window.saveScore()
-        self.Destroy()
-
-    def setIcon(self):
-        icon = wx.Icon("icon.ico",wx.BITMAP_TYPE_ICO)
-        self.SetIcon(icon)
-
-
-class App(wx.App):
-
-    def OnInit(self):
-        self.frame = Frame(u"2048 v1.0.1 by heibanke")
-        self.frame.SetClientSize((505,720))
-        self.frame.Center()
-        self.frame.Show()
-        return True
-
-
 if __name__ == "__main__":
-    app = App()
+    app = wx.App()
+    Frame(u"2048 v1.0.1 by heibanke")
     app.MainLoop()
