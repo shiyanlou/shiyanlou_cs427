@@ -47,14 +47,22 @@ class Frame(wx.Frame):
                 
         self.setIcon()
         self.initGame()
+        
+        panel = wx.Panel(self)
+        panel.Bind(wx.EVT_KEY_DOWN,self.onKeyDown)
+        panel.SetFocus()
+
         self.initBuffer()
         self.Bind(wx.EVT_SIZE,self.onSize) 
-        self.Bind(wx.EVT_KEY_DOWN,self.onKeyDown)
+        self.Bind(wx.EVT_PAINT, self.onPaint)
         self.Bind(wx.EVT_CLOSE,self.onClose)
         self.SetClientSize((505,720))
         self.Center()
         self.Show()
-        
+    
+    def onPaint(self,event):
+        dc = wx.BufferedPaintDC(self,self.buffer)
+    
     def onClose(self,event):
         self.saveScore()
         self.Destroy()
